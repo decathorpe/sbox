@@ -1,0 +1,12 @@
+{
+  "application": {
+    "name": "org.gnome.gedit",
+    "binary": "/usr/bin/gedit",
+    "mount-home": "rw",
+    "mount-runtime_dir": true,
+    "network": true,
+    "mounts-ro": {
+      "/etc/fonts": "/etc/fonts"
+    }
+  }
+}

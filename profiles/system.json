@@ -1,0 +1,16 @@
+{
+  "system": {
+    "network": false,
+    "mount-home": "no",
+    "mount-dev": false,
+    "mount-proc": false,
+    "mount-tmp": true,
+    "mount-usr": true,
+    "mount-runtime_dir": false,
+    "confine": ["all"],
+    "directories": [],
+    "symlinks": {},
+    "mounts-ro": {},
+    "mounts-rw": {}
+  }
+}

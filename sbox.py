@@ -24,60 +24,102 @@ import os
 import sys
 
 import bwrap
+import profile_parser as pp
 
-HELP = """
+HELP_TEMPLATE = """
 Usage:
   {} command [args ...]
 """
 
 if __name__ == "__main__":
-    HELP = HELP.format(sys.argv[0])
+    HELP_TEXT = HELP_TEMPLATE.format(sys.argv[0])
 else:
-    HELP = HELP.format("sbox")
-
-MOUNT_HOME = False
-FRESH_XDG_RUNTIME_DIR = False
+    HELP_TEXT = HELP_TEMPLATE.format("sbox")
 
 
 def main() -> int:
     if len(sys.argv) < 2:
-        print(HELP)
+        print(HELP_TEXT)
         return 1
+
+    profile_name = sys.argv[1]
+
+    if not os.path.exists("profiles/" + profile_name + ".json"):
+        print("No profile found for this application. Using default settings.")
+        options = pp.collect_options("profiles/system.json")
+    else:
+        options = pp.collect_options("profiles/system.json", "profiles/" + profile_name + ".json")
 
     wrapper = bwrap.BubbleWrapper()
 
-    wrapper.add_bind_mount_readonly("/usr", "/usr")
+    # mount /usr and create expected directory symlinks
+    if options["mount-usr"]:
+        wrapper.add_bind_mount_readonly("/usr", "/usr")
+        wrapper.create_symlink("usr/bin", "/bin")
+        wrapper.create_symlink("usr/sbin", "/sbin")
+        wrapper.create_symlink("usr/lib", "/lib")
+        wrapper.create_symlink("usr/lib64", "/lib64")
 
-    wrapper.create_symlink("usr/bin", "/bin")
-    wrapper.create_symlink("usr/sbin", "/sbin")
-    wrapper.create_symlink("usr/lib64", "/lib64")
-    wrapper.create_symlink("usr/lib", "/lib")
+    # mount /dev
+    if options["mount-dev"]:
+        wrapper.set_dev("/dev")
 
-    # wrapper.add_bind_mount_readonly("/etc/resolv.conf", "/etc/resolv.conf")
-    # wrapper.add_bind_mount_readonly("/etc/passwd", "/etc/passwd")
-    # wrapper.add_bind_mount_readonly("/etc/group", "/etc/group")
-    wrapper.add_bind_mount_readonly("/etc/fonts", "/etc/fonts")
+    # mount /proc
+    if options["mount-proc"]:
+        wrapper.set_proc("/proc")
 
-    if MOUNT_HOME:
+    # mount /tmp
+    if options["mount-tmp"]:
+        wrapper.add_tmpfs("/tmp")
+
+    # mount or create an empty $HOME
+    if options["mount-home"] == "ro":
+        wrapper.add_bind_mount_readonly(os.getenv("HOME"), os.getenv("HOME"))
+    elif options["mount-home"] == "rw":
         wrapper.add_bind_mount(os.getenv("HOME"), os.getenv("HOME"))
     else:
         wrapper.create_directory(os.getenv("HOME"))
 
-    wrapper.set_dev("/dev")
-    wrapper.set_proc("/proc")
-    wrapper.add_tmpfs("/tmp")
-
-    wrapper.add_unshare("all")
-    # wrapper.share_net()
-
-    if FRESH_XDG_RUNTIME_DIR:
+    # mount XDG_RUNTIME_DIR:
+    if options["mount-runtime_dir"]:
+        if "XDG_RUNTIME_DIR" in os.environ:
+            wrapper.add_bind_mount(os.getenv("XDG_RUNTIME_DIR"), os.getenv("XDG_RUNTIME_DIR"))
+    else:
         dir_xdg_runtime = "/run/user/" + str(os.getuid())
         wrapper.create_directory(dir_xdg_runtime)
         wrapper.set_env("XDG_RUNTIME_DIR", dir_xdg_runtime)
-    else:
-        wrapper.add_bind_mount(os.getenv("XDG_RUNTIME_DIR"), os.getenv("XDG_RUNTIME_DIR"))
 
-    return wrapper.exec(sys.argv[1], sys.argv[2:])
+    # create specified directories
+    for directory in options["directories"]:
+        wrapper.create_directory(directory)
+
+    # create specified symlinks
+    for symlink in options["symlinks"]:
+        wrapper.create_symlink(options["symlinks"][symlink], symlink)
+
+    # mount requested read-only locations
+    for mount_ro in options["mounts-ro"]:
+        wrapper.add_bind_mount_readonly(options["mounts-ro"][mount_ro], mount_ro)
+
+    # mount requested read-write locations
+    for mount_rw in options["mounts-rw"]:
+        wrapper.add_bind_mount_readonly(options["mounts-ro"][mount_rw], mount_rw)
+
+    # unshare namespaces as specified
+    for confine in options["confine"]:
+        wrapper.add_unshare(confine)
+
+    # enable networking
+    if options["network"]:
+        if "all" in options["confine"]:
+            wrapper.share_net()
+
+        wrapper.add_bind_mount_readonly("/etc/resolv.conf", "/etc/resolv.conf")
+
+    if "binary" not in options:
+        return wrapper.exec(sys.argv[1], sys.argv[2:])
+    else:
+        return wrapper.exec(options["binary"], sys.argv[2:])
 
 
 if __name__ == "__main__":
