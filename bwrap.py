@@ -1,3 +1,23 @@
+"""
+python convenience wrapper around the bubblewrap (bwrap) CLI
+"""
+
+#     python convenience wrapper around the bubblewrap (bwrap) CLI
+#     Copyright (C) 2017  Fabio Valentini
+#
+#     This program is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     This program is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import subprocess
 import sys
 
@@ -130,7 +150,7 @@ class BubbleWrapper:
             cmd.append("--remount-ro")
             cmd.append(remountro)
 
-        if not self.proc is not None:
+        if self.proc is not None:
             cmd.append("--proc")
             cmd.append(self.proc)
 
