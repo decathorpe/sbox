@@ -23,8 +23,8 @@ python program to execute other programs in a confined environment (bwrap)
 import os
 import sys
 
-import bwrap
-import profile_parser as pp
+from sbox.bwrap import BubbleWrapper
+import sbox.profile_parser as pp
 
 HELP_TEMPLATE = """
 Usage:
@@ -50,7 +50,7 @@ def main() -> int:
     else:
         options = pp.collect_options("profiles/system.json", "profiles/" + profile_name + ".json")
 
-    wrapper = bwrap.BubbleWrapper()
+    wrapper = BubbleWrapper()
 
     # mount /usr and create expected directory symlinks
     if options["mount-usr"]:
