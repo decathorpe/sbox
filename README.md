@@ -19,6 +19,6 @@ the code), running an example is as easy as executing the `sbox.py` script:
 
 # Using a normal binary
 # Hint: if no profile is found, the system default settings are used
-./sbox.py gedit
+./sbox.py bash
 ```
 
