@@ -8,15 +8,15 @@ from setuptools import setup
 NAME = "sbox"
 DATADIR = "/usr/share/" + NAME
 
-setup(name="sbox",
+setup(name=NAME,
       version=0,
       author="Fabio Valentini",
       author_email="decathorpe@gmail.com",
       description="Simple Application Sandboxing using bubblewrap",
       license="GPLv3",
       url="http://github.com/decathorpe/sbox",
-      packages=['sbox'],
-      install_requires=[],
+      packages=['sbox', 'bwrapper'],
+      install_requires=['psutil'],
       scripts=[],
       entry_points= {'sbox': ['sbox=sbox:main']},
       data_files=[(os.path.join(DATADIR, "profiles"), ['profiles/org.gnome.gedit.json']),

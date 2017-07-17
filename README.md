@@ -15,10 +15,10 @@ the code), running an example is as easy as executing the `sbox.py` script:
 ```sh
 # Using the example application profile
 # Hint: Mostly works, but not everything behaves as expected (WIP, as I said)
-./sbox.py org.gnome.gedit
+./test.py org.gnome.gedit
 
 # Using a normal binary
 # Hint: if no profile is found, the system default settings are used
-./sbox.py bash
+./test.py bash
 ```
 
