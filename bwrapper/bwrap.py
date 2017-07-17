@@ -68,6 +68,31 @@ class BubbleWrapper:
         for file in self.filesystem.temp_files:
             os.remove(file)
 
+    def gen_args(self) -> list:
+        """This method generates the CLI options for `bwrap` from this instance's attributes."""
+
+        args = list()
+
+        args.append(self.bwrap)
+
+        args.extend(self.filesystem.gen_args())
+        args.extend(self.environment.gen_args())
+        args.extend(self.confinement.gen_args())
+
+        if self.chdir is not None:
+            args.extend(["--chdir", self.chdir])
+
+        for fd in self.sync_fds:
+            args.extend(["--sync-fd", str(fd)])
+
+        if self.lock_file is not None:
+            args.extend(["--lock-file", self.lock_file])
+
+        if self.die_with_parent:
+            args.append("--die-with-parent")
+
+        return args
+
     def exec(self, comm: str, args: list) -> int:
         """
         This method executes the command `comm` with arguments `args` in the sandbox defined by this
@@ -79,25 +104,7 @@ class BubbleWrapper:
         :return: passes through the return value of the child process
         """
 
-        cmd = list()
-
-        cmd.append(self.bwrap)
-
-        cmd.extend(self.filesystem.gen_args())
-        cmd.extend(self.environment.gen_args())
-        cmd.extend(self.confinement.gen_args())
-
-        if self.chdir is not None:
-            cmd.extend(["--chdir", self.chdir])
-
-        for fd in self.sync_fds:
-            cmd.extend(["--sync-fd", str(fd)])
-
-        if self.lock_file is not None:
-            cmd.extend(["--lock-file", self.lock_file])
-
-        if self.die_with_parent:
-            cmd.append("--die-with-parent")
+        cmd = self.gen_args()
 
         cmd.append(comm)
 
