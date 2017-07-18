@@ -95,11 +95,11 @@ class BWEnvironment:
 
         if self.uid is not None:
             args.append("--uid")
-            args.append(self.uid)
+            args.append(str(self.uid))
 
         if self.gid is not None:
             args.append("--gid")
-            args.append(self.gid)
+            args.append(str(self.gid))
 
         if self.hostname is not None:
             args.append("--hostname")

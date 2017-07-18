@@ -190,7 +190,7 @@ class BWFileSystem:
             print("Destination '{}' supplied multiple times.".format(dest))
         self.entries.append(BWFSCreateSymlink(src, dest))
 
-    def create_file_from_file(self, src: str, dest: str):
+    def create_file_from_file(self, src: str, dest: str) -> int:
         """This method adds a file to the file system. It's contents will be read from the file at
         the specified path."""
         if dest in self.used_names:
@@ -198,29 +198,30 @@ class BWFileSystem:
 
         if not os.path.exists(src):
             print("File at path {} could not be found.".format(src))
-            return
+            return -1
 
         if not os.access(src, os.O_RDONLY):
             print("File at path {} could not be read.".format(src))
-            return
+            return -1
 
         fd = os.open(src, os.O_RDONLY)
         self.entries.append(BWFSCreateFileFromFD(fd, dest))
+        return fd
 
-    def create_file_from_contents(self, contents: str, dest: str):
+    def create_file_from_contents(self, contents: str, dest: str) -> int:
         """This method adds a file to the file system. It's contents will be the specified string.
         """
         if dest in self.used_names:
             print("Destination '{}' supplied multiple times.".format(dest))
 
-        tmp = tempfile.mkstemp(dir=os.getcwd(), prefix=".")
-        self.temp_files.append(tmp)
+        fd, path = tempfile.mkstemp(dir=os.getcwd(), prefix=".")
+        self.temp_files.append(path)
 
-        with open(tmp, "w") as file:
+        with open(path, "w") as file:
             file.write(contents)
 
-        fd = os.open(tmp, os.O_RDONLY)
         self.entries.append(BWFSCreateFileFromFD(fd, dest))
+        return fd
 
     def create_file_from_fd(self, fd: int, dest: str):
         """This method adds a file to the file system. It's contents will be read from the

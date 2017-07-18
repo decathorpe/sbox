@@ -49,10 +49,10 @@ def main() -> int:
     # mount /usr and create expected directory symlinks
     if options["mount-usr"]:
         wrapper.filesystem.add_bind_mount_ro("/usr", "/usr")
-        wrapper.filesystem.create_symlink("usr/bin", "/bin")
-        wrapper.filesystem.create_symlink("usr/sbin", "/sbin")
-        wrapper.filesystem.create_symlink("usr/lib", "/lib")
-        wrapper.filesystem.create_symlink("usr/lib64", "/lib64")
+        wrapper.filesystem.create_symlink("/usr/bin", "/bin")
+        wrapper.filesystem.create_symlink("/usr/sbin", "/sbin")
+        wrapper.filesystem.create_symlink("/usr/lib", "/lib")
+        wrapper.filesystem.create_symlink("/usr/lib64", "/lib64")
 
     # mount /dev
     if options["mount-dev"]:
