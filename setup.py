@@ -1,25 +1,25 @@
 """
-setuptools install script for kentauros
+setuptools install script for sbox
 """
 
 import os
+import rpm
 from setuptools import setup
 
-NAME = "sbox"
-DATADIR = "/usr/share/" + NAME
+DATADIR = os.path.join(rpm.expandMacro("%{_datadir}"), "sbox")
 
-setup(name=NAME,
+setup(name="sbox",
       version=0,
       author="Fabio Valentini",
       author_email="decathorpe@gmail.com",
       description="Simple Application Sandboxing using bubblewrap",
       license="GPLv3",
       url="http://github.com/decathorpe/sbox",
-      packages=['sbox', 'bwrapper'],
-      install_requires=['psutil'],
+      packages=['sbox'],
+      install_requires=['bwrapper', 'rpm'],
       scripts=[],
-      test_suite='nose.collector',
-      tests_require=['nose'],
+      # test_suite='nose.collector',
+      # tests_require=['nose'],
       entry_points={'sbox': ['sbox=sbox:main']},
       data_files=[(os.path.join(DATADIR, "profiles"), ['profiles/org.gnome.gedit.json']),
                   (os.path.join(DATADIR, "profiles"), ['profiles/system.json'])],
