@@ -44,6 +44,10 @@ def main() -> int:
     else:
         options = pp.collect_options("profiles/system.json", "profiles/" + profile_name + ".json")
 
+    if "SBOX_DEBUG" in os.environ:
+        print("Parsed application profile:")
+        print(options)
+
     wrapper = BubbleWrapper()
 
     # mount /usr and create expected directory symlinks
@@ -117,5 +121,13 @@ def main() -> int:
         comm = sys.argv[1]
 
     args = sys.argv[2:]
+
+    if "SBOX_DEBUG" in os.environ:
+        argv = wrapper.gen_args()
+        argv.append(comm)
+        argv.extend(args)
+
+        print("bwrap arguments:")
+        print(argv)
 
     return wrapper.exec(comm, args)
