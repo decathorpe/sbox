@@ -13,17 +13,35 @@ def parse_profile(path: str) -> dict:
             return dict()
 
 
+def merge_dicts(low: dict, high: dict) -> dict:
+    ret = dict()
+
+    for key in low:
+        ret[key] = low[key]
+
+    for key in high:
+        if isinstance(high[key], dict):
+            ret[key] = merge_dicts(low[key], high[key])
+        elif isinstance(high[key], list):
+            ret[key] = ret[key].extend(high[key])
+        else:
+            ret[key] = high[key]
+
+    return ret
+
+
 def collect_options(path_sys: str, path_app: str = "") -> dict:
     opts_sys = parse_profile(path_sys)
     opts_app = parse_profile(path_app)
 
-    options = dict()
-
     if "system" in opts_sys:
-        for key in opts_sys["system"]:
-            options[key] = opts_sys["system"][key]
-    if "application" in opts_app:
-        for key in opts_app["application"]:
-            options[key] = opts_app["application"][key]
+        opts_sys = opts_sys["system"]
+    else:
+        opts_sys = dict()
 
-    return options
+    if "application" in opts_app:
+        opts_app = opts_app["application"]
+    else:
+        opts_app = dict()
+
+    return merge_dicts(opts_sys, opts_app)
